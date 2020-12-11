@@ -8,23 +8,34 @@ import AsyncStorage from "@react-native-community/async-storage";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { persistCache } from "apollo-cache-persist";
 import ApolloClient from "apollo-boost";
+import { ThemeProvider } from "styled-components";
 import { ApolloProvider } from "react-apollo-hooks";
 import apolloClientOptions from "./apollo";
+import styles from "./styles";
 
 export default function App() {
   const [loaded, setLoaded] = useState(false);
   const [client, setClient] = useState(null);
+
+  // Preload stuff
   const preLoad = async () => {
     try {
+      // Preload font
       await Font.loadAsync({
         ...Ionicons.font,
       });
+
+      // Preload assets
       await Asset.loadAsync([require("./assets/logo.png")]);
+
+      // Create cache
       const cache = new InMemoryCache();
       await persistCache({
         cache,
         storage: AsyncStorage,
       });
+
+      // Create a new apollo client
       const client = new ApolloClient({
         cache,
         ...apolloClientOptions,
@@ -40,9 +51,11 @@ export default function App() {
   }, []);
   return loaded && client ? (
     <ApolloProvider client={client}>
-      <View>
-        <Text>Open up App.js to start!</Text>
-      </View>
+      <ThemeProvider theme={styles}>
+        <View>
+          <Text>Open up App.js to start!</Text>
+        </View>
+      </ThemeProvider>
     </ApolloProvider>
   ) : (
     <AppLoading />
